@@ -1,0 +1,528 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Oral Health & Tobacco Quiz</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #a8edea, #fed6e3);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    align-items: center;
+    color: #222;
+  }
+
+  #quiz-container {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    width: 90%;
+    max-width: 600px;
+    padding: 25px 30px;
+  }
+
+  h1 {
+    text-align: center;
+    color: #34495e;
+    margin-bottom: 15px;
+    font-weight: 700;
+  }
+
+  #difficulty-selection {
+    margin-bottom: 25px;
+    text-align: center;
+  }
+
+  .btn-level {
+    background-color: #3498db;
+    border: none;
+    color: white;
+    padding: 12px 25px;
+    margin: 8px;
+    font-size: 16px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-weight: 600;
+  }
+
+  .btn-level:hover {
+    background-color: #2980b9;
+  }
+
+  #question {
+    font-size: 1.3em;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+
+  ul#choices {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 20px;
+  }
+
+  ul#choices li {
+    background-color: #ecf0f1;
+    border-radius: 8px;
+    margin: 8px 0;
+    padding: 14px 18px;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease;
+    border: 2px solid transparent;
+  }
+
+  ul#choices li:hover {
+    background-color: #d6eaf8;
+  }
+
+  ul#choices li.correct {
+    background-color: #2ecc71;
+    color: white;
+    border-color: #27ae60;
+  }
+
+  ul#choices li.incorrect {
+    background-color: #e74c3c;
+    color: white;
+    border-color: #c0392b;
+  }
+
+  #explanation {
+    background-color: #f9f9f9;
+    border-left: 5px solid #3498db;
+    padding: 15px 18px;
+    font-size: 1em;
+    margin-bottom: 20px;
+    display: none;
+    border-radius: 0 8px 8px 0;
+  }
+
+  #controls {
+    text-align: center;
+  }
+
+  button#next-btn, button#restart-btn {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 1.1em;
+    border-radius: 30px;
+    cursor: pointer;
+    margin: 10px 5px 0;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+  }
+
+  button#next-btn:hover, button#restart-btn:hover {
+    background-color: #2980b9;
+  }
+
+  #result {
+    font-size: 1.2em;
+    font-weight: 700;
+    text-align: center;
+    color: #34495e;
+    margin-top: 20px;
+  }
+</style>
+</head>
+<body>
+
+<div id="quiz-container">
+
+  <h1>Oral Health & Tobacco Quiz</h1>
+
+  <div id="difficulty-selection">
+    <p>Select Difficulty Level:</p>
+    <button class="btn-level" data-level="easy">Easy</button>
+    <button class="btn-level" data-level="medium">Medium</button>
+    <button class="btn-level" data-level="hard">Hard</button>
+  </div>
+
+  <div id="quiz" style="display:none;">
+    <div id="question"></div>
+    <ul id="choices"></ul>
+    <div id="explanation"></div>
+
+    <div id="controls">
+      <button id="next-btn" style="display:none;">Next</button>
+      <button id="restart-btn" style="display:none;">Restart</button>
+    </div>
+
+    <div id="result"></div>
+  </div>
+
+</div>
+
+<script>
+    function shuffleQuestion(question) {
+  const choices = [...question.choices];
+  const explanations = [...question.explanations];
+  const correctIndex = question.correct;
+
+  // Pair choices with explanations
+  const paired = choices.map((choice, index) => ({
+    choice,
+    explanation: explanations[index],
+    isCorrect: index === correctIndex
+  }));
+
+  // Shuffle the paired array
+  for (let i = paired.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [paired[i], paired[j]] = [paired[j], paired[i]];
+  }
+
+  // Find new correct index
+  const newCorrectIndex = paired.findIndex(item => item.isCorrect);
+
+  return {
+    question: question.question,
+    choices: paired.map(item => item.choice),
+    correct: newCorrectIndex,
+    explanations: paired.map(item => item.explanation)
+  };
+}
+
+function shuffleQuizData(data) {
+  const shuffledData = {};
+  for (const level in data) {
+    shuffledData[level] = data[level].map(shuffleQuestion);
+  }
+  return shuffledData;
+}
+
+
+  const quizDataToShuffle = {
+    easy: [
+      {
+        question: "What is the primary harmful substance in tobacco responsible for addiction?",
+        choices: ["Nicotine", "Tar", "Carbon monoxide", "Lead"],
+        correct: 0,
+        explanations: [
+          "Correct! Nicotine is the addictive chemical in tobacco.",
+          "Incorrect. Tar causes lung damage but is not the addictive substance.",
+          "Incorrect. Carbon monoxide reduces oxygen but is not addictive.",
+          "Incorrect. Lead is a toxic metal but not the main addictive substance in tobacco."
+        ]
+      },
+      {
+        question: "How does smoking mainly affect oral health?",
+        choices: ["Causes gum disease", "Strengthens teeth", "Whitens teeth", "Improves saliva flow"],
+        correct: 0,
+        explanations: [
+          "Correct! Smoking increases risk of gum disease and tooth loss.",
+          "Incorrect. Smoking does not strengthen teeth.",
+          "Incorrect. Smoking stains teeth and does not whiten them.",
+          "Incorrect. Smoking reduces saliva flow, leading to dry mouth."
+        ]
+      },
+      {
+        question: "What condition is a common early sign of oral cancer?",
+        choices: ["A persistent sore or ulcer", "A tooth cavity", "Bad breath", "Bleeding gums"],
+        correct: 0,
+        explanations: [
+          "Correct! Persistent sores or ulcers may indicate oral cancer.",
+          "Incorrect. Cavities are tooth decay, not cancer.",
+          "Incorrect. Bad breath can have many causes, not necessarily cancer.",
+          "Incorrect. Bleeding gums usually indicate gum disease, not cancer."
+        ]
+      },
+      {
+        question: "Which of these increases risk of oral cancer the most?",
+        choices: ["Tobacco use", "Brushing teeth", "Drinking water", "Using mouthwash"],
+        correct: 0,
+        explanations: [
+          "Correct! Tobacco use greatly increases oral cancer risk.",
+          "Incorrect. Brushing teeth improves oral health.",
+          "Incorrect. Drinking water has no risk for oral cancer.",
+          "Incorrect. Mouthwash generally helps oral hygiene."
+        ]
+      },
+      {
+        question: "What is the best way to reduce oral health risks from tobacco?",
+        choices: ["Quit tobacco use", "Brush harder", "Use whitening toothpaste", "Drink more soda"],
+        correct: 0,
+        explanations: [
+          "Correct! Quitting tobacco is the most effective way.",
+          "Incorrect. Brushing harder won't counteract tobacco risks.",
+          "Incorrect. Whitening toothpaste does not reduce tobacco damage.",
+          "Incorrect. Soda actually harms teeth further."
+        ]
+      }
+    ],
+
+    medium: [
+      {
+        question: "How does smoking affect gum tissue at the cellular level?",
+        choices: [
+          "Reduces blood flow and oxygen delivery",
+          "Increases collagen production",
+          "Enhances immune response",
+          "Stimulates saliva secretion"
+        ],
+        correct: 0,
+        explanations: [
+          "Correct! Smoking constricts blood vessels, reducing oxygen to gums.",
+          "Incorrect. Smoking decreases collagen, harming tissue repair.",
+          "Incorrect. Smoking suppresses immune function.",
+          "Incorrect. Smoking decreases saliva secretion."
+        ]
+      },
+      {
+        question: "Which oral bacteria increase in smokers, contributing to periodontitis?",
+        choices: [
+          "Porphyromonas gingivalis",
+          "Streptococcus mutans",
+          "Lactobacillus acidophilus",
+          "Actinomyces viscosus"
+        ],
+        correct: 0,
+        explanations: [
+          "Correct! Porphyromonas gingivalis is strongly associated with periodontitis in smokers.",
+          "Incorrect. Streptococcus mutans is linked to cavities.",
+          "Incorrect. Lactobacillus acidophilus relates to digestion.",
+          "Incorrect. Actinomyces is involved in root caries."
+        ]
+      },
+      {
+        question: "Which compound in tobacco smoke causes DNA damage linked to oral cancer?",
+        choices: [
+          "Polycyclic aromatic hydrocarbons (PAHs)",
+          "Vitamin C",
+          "Water vapor",
+          "Oxygen"
+        ],
+        correct: 0,
+        explanations: [
+          "Correct! PAHs in smoke are carcinogenic and damage DNA.",
+          "Incorrect. Vitamin C is an antioxidant.",
+          "Incorrect. Water vapor is harmless.",
+          "Incorrect. Oxygen is essential for life."
+        ]
+      },
+      {
+        question: "What is the mechanism behind nicotine's addictive potential?",
+        choices: [
+          "Binding to nicotinic acetylcholine receptors in the brain",
+          "Blocking dopamine receptors",
+          "Increasing serotonin degradation",
+          "Inhibiting adrenaline release"
+        ],
+        correct: 0,
+        explanations: [
+          "Correct! Nicotine stimulates nicotinic acetylcholine receptors, releasing dopamine.",
+          "Incorrect. Nicotine does not block dopamine receptors.",
+          "Incorrect. Nicotine affects dopamine, not serotonin degradation.",
+          "Incorrect. Nicotine stimulates adrenaline release."
+        ]
+      },
+      {
+        question: "Why is tobacco chewing also harmful to oral health?",
+        choices: [
+          "It exposes oral mucosa to carcinogens directly",
+          "It improves gum health",
+          "It whitens teeth",
+          "It prevents bad breath"
+        ],
+        correct: 0,
+        explanations: [
+          "Correct! Chewing tobacco delivers carcinogens and irritants directly to mouth tissues.",
+          "Incorrect. It damages gum health.",
+          "Incorrect. It stains teeth.",
+          "Incorrect. It often causes bad breath."
+        ]
+      }
+    ],
+
+    hard: [
+      {
+        question: "Which biomarker is commonly elevated in saliva of tobacco users indicating oxidative stress?",
+        choices: [
+          "8-hydroxydeoxyguanosine (8-OHdG)",
+          "Glucose",
+          "Albumin",
+          "Uric acid"
+        ],
+        correct: 0,
+        explanations: [
+          "Correct! 8-OHdG is a marker for oxidative DNA damage in smokers.",
+          "Incorrect. Glucose levels are not a specific biomarker for tobacco use.",
+          "Incorrect. Albumin is a general protein, not specific to tobacco effects.",
+          "Incorrect. Uric acid is an antioxidant but not a direct tobacco biomarker."
+        ]
+      },
+      {
+        question: "Which molecular pathway is activated by tobacco carcinogens leading to oral epithelial dysplasia?",
+        choices: [
+          "p53 tumor suppressor pathway mutation",
+          "Insulin signaling pathway",
+          "Renin-angiotensin system",
+          "Wnt signaling in bone remodeling"
+        ],
+        correct: 0,
+        explanations: [
+          "Correct! Mutations in p53 gene are common in tobacco-induced oral cancers.",
+          "Incorrect. Insulin pathway relates to metabolism.",
+          "Incorrect. Renin-angiotensin affects blood pressure.",
+          "Incorrect. Wnt signaling is involved in bone but not primary oral epithelial cancer."
+        ]
+      },
+      {
+        question: "What is the main role of cytochrome P450 enzymes in tobacco-related carcinogenesis?",
+        choices: [
+          "Metabolizing tobacco procarcinogens into reactive metabolites",
+          "Repairing DNA damage",
+          "Neutralizing free radicals",
+          "Promoting cell differentiation"
+        ],
+        correct: 0,
+        explanations: [
+          "Correct! Cytochrome P450 enzymes bioactivate procarcinogens to DNA-damaging metabolites.",
+          "Incorrect. DNA repair is done by other mechanisms.",
+          "Incorrect. Neutralization is done by antioxidants.",
+          "Incorrect. They do not promote differentiation."
+        ]
+      },
+      {
+        question: "Which type of oral lesion has the highest risk of progressing to squamous cell carcinoma?",
+        choices: [
+          "Leukoplakia with dysplasia",
+          "Fibroma",
+          "Mucocele",
+          "Herpetic lesion"
+        ],
+        correct: 0,
+        explanations: [
+          "Correct! Dysplastic leukoplakia is a premalignant lesion.",
+          "Incorrect. Fibroma is benign.",
+          "Incorrect. Mucocele is a cyst.",
+          "Incorrect. Herpetic lesions usually heal without malignancy."
+        ]
+      },
+      {
+        question: "What is the most effective pharmacological aid for tobacco cessation?",
+        choices: [
+            "Antibiotics",
+            "Nicotine replacement therapy (NRT)",
+          "Painkillers",
+          "Antihistamines"
+        ],
+        correct: 0,
+        explanations: [
+          "Correct! NRT helps reduce withdrawal symptoms.",
+          "Incorrect. Antibiotics do not aid cessation.",
+          "Incorrect. Painkillers are unrelated.",
+          "Incorrect. Antihistamines do not affect addiction."
+        ]
+      }
+    ]
+  };
+
+  
+const quizData = shuffleQuizData(quizDataToShuffle);
+
+  const difficultySelectionDiv = document.getElementById('difficulty-selection');
+  const quizContainer = document.getElementById('quiz');
+  const questionEl = document.getElementById('question');
+  const choicesEl = document.getElementById('choices');
+  const explanationDiv = document.getElementById('explanation');
+  const nextBtn = document.getElementById('next-btn');
+  const restartBtn = document.getElementById('restart-btn');
+  const resultDiv = document.getElementById('result');
+
+  let currentLevel = '';
+  let currentQuestionIndex = 0;
+  let score = 0;
+  let answered = false;
+
+  function startQuiz(level) {
+    currentLevel = level;
+    currentQuestionIndex = 0;
+    score = 0;
+    difficultySelectionDiv.style.display = 'none';
+    quizContainer.style.display = 'block';
+    nextBtn.style.display = 'none';
+    restartBtn.style.display = 'none';
+    resultDiv.textContent = '';
+    loadQuestion();
+  }
+
+  function loadQuestion() {
+    answered = false;
+    explanationDiv.style.display = 'none';
+    nextBtn.style.display = 'none';
+    restartBtn.style.display = 'none';
+    resultDiv.textContent = '';
+
+    const q = quizData[currentLevel][currentQuestionIndex];
+    questionEl.textContent = `Q${currentQuestionIndex + 1}. ${q.question}`;
+    choicesEl.innerHTML = '';
+
+    q.choices.forEach((choice, index) => {
+      const li = document.createElement('li');
+      li.textContent = choice;
+      li.addEventListener('click', () => {
+        if (answered) return;
+        answered = true;
+        checkAnswer(index);
+      });
+      choicesEl.appendChild(li);
+    });
+  }
+
+  function checkAnswer(selectedIndex) {
+    const q = quizData[currentLevel][currentQuestionIndex];
+    const choiceItems = choicesEl.querySelectorAll('li');
+
+    choiceItems.forEach((li, idx) => {
+      li.style.cursor = 'default';
+      if (idx === q.correct) {
+        li.classList.add('correct');
+      }
+      if (idx === selectedIndex && selectedIndex !== q.correct) {
+        li.classList.add('incorrect');
+      }
+    });
+
+    explanationDiv.style.display = 'block';
+    explanationDiv.textContent = q.explanations[selectedIndex];
+
+    if (selectedIndex === q.correct) score++;
+
+    if (currentQuestionIndex < quizData[currentLevel].length - 1) {
+      nextBtn.style.display = 'inline-block';
+    } else {
+      restartBtn.style.display = 'inline-block';
+      resultDiv.textContent = `Quiz complete! Your score: ${score} / ${quizData[currentLevel].length}`;
+    }
+  }
+
+  nextBtn.addEventListener('click', () => {
+    currentQuestionIndex++;
+    loadQuestion();
+  });
+
+  restartBtn.addEventListener('click', () => {
+    difficultySelectionDiv.style.display = 'block';
+    quizContainer.style.display = 'none';
+  });
+
+  document.querySelectorAll('.btn-level').forEach(button => {
+    button.addEventListener('click', () => {
+      startQuiz(button.dataset.level);
+    });
+  });
+</script>
+
+</body>
+</html>
